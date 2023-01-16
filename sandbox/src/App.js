@@ -4,13 +4,20 @@ import { React, useState } from "react";
 
 function App() {
   const [input, setInput] = useState("");
-  const [update, setUpdate] = useState(input);
+  // const [update, setUpdate] = useState(input);
+  const [list, setList] = useState([]);
   const handleInput = (e) => {
     setInput(e.target.value);
     console.log("Here", e.target.value);
   };
+  const handleEdit = () => {};
   const handleClick = () => {
-    setUpdate(input);
+    let tempList = list;
+    tempList.push(input);
+    setList(tempList);
+    setInput("");
+
+    // setUpdate(input);
   };
 
   return (
@@ -31,12 +38,20 @@ function App() {
               placeholder={"Add things here!"}
             ></input>
             <button onClick={handleClick}> Add</button>
-            <li>
+            {list.length > 0 &&
+              list.map((item) => (
+                <li>
+                  {item}
+                  <button>Edit</button>
+                </li>
+              ))}
+            {/* <li>
               <h1>something:{input}</h1>
+
               <h3>TASKLIST {update}</h3>i need to make this list grow with an
               add button or something !!:<button>Edit</button>
               <button>Delete</button>
-            </li>
+            </li> */}
           </ul>
         </div>
       </header>
