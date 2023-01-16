@@ -10,7 +10,6 @@ function App() {
     setInput(e.target.value);
     console.log("Here", e.target.value);
   };
-  const handleEdit = () => {};
   const handleClick = () => {
     let tempList = list;
     tempList.push(input);
