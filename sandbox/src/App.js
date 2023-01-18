@@ -4,68 +4,81 @@ import { React, useState } from "react";
 
 function App() {
   const [input, setInput] = useState("");
-  // const [update, setUpdate] = useState(input);
-  const [list, setList] = useState([]);
-  const handleInput = (e) => {
-    setInput(e.target.value);
-    console.log("Here", e.target.value);
+  const [todoList, setTodoList] = useState([]);
+  const [completeTaskCount, setCompleteTaskCount] = useState(0);
+  const handleClear = ()=>{
+    setTodoList([])
+    setCompleteTaskCount(0)
+  }
+  const handleComplete = (id) => {
+    let list = todoList.map((task) => {
+      let item = {};
+      if (task.id === id) {
+        if (!task.complete) {
+          setCompleteTaskCount(completeTaskCount + 1);
+        } else {setCompleteTaskCount(completeTaskCount -1 )}
+        item = { ...task, complete: !task.complete };
+      } else item = { ...task };
+      return item;
+    });
+    setTodoList(list);
   };
   const handleClick = () => {
-    let tempList = list;
-    tempList.push(input);
-    setList(tempList);
+    const id = todoList.length + 1;
+    setTodoList((prev) => [
+      ...prev,
+      {
+        id: id,
+        task: input,
+        complete: false,
+      },
+    ]);
     setInput("");
-
-    // setUpdate(input);
   };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Welcome</h1>
-        <div>
-          <h2>Things that need to get done</h2>
-          <button>Change Title</button>
-          <ul>
-            How to start
-            <br></br>
-            <input
-              onChange={handleInput}
-              value={input}
-              type="text"
-              name="name"
-              placeholder={"Add things here!"}
-            ></input>
-            <button onClick={handleClick}> Add</button>
-            {list.length > 0 &&
-              list.map((item) => (
-                <li>
-                  {item}
-                  <button>Edit</button>
-                </li>
-              ))}
-            {/* <li>
-              <h1>something:{input}</h1>
+    <div>
+      <h2>Todo list</h2>
+      <input
+        value={input}
+        onInput={(e) => {
+          setInput(e.target.value);
+        }}
+      ></input>
+      <button
+        onClick={() => {
+          handleClick();
+        }}
+      >
+        Add
+      </button>
+      <div>
+      <b>Pending Tasks: </b> {todoList.length - completeTaskCount}
 
-              <h3>TASKLIST {update}</h3>i need to make this list grow with an
-              add button or something !!:<button>Edit</button>
-              <button>Delete</button>
-            </li> */}
-          </ul>
-        </div>
-      </header>
+      </div>
+      <div>
+      <b>Completed Tasks: </b>{completeTaskCount}
 
-      <h2>
-        Wouldnt it be nice if this message changed depending on the amount of
-        tasks you got done!
-      </h2>
-      <p>
-        or if there was a check box and a percentage that tracked your progress
-      </p>
-      <p>
-        would be nice if something nice flashed on screen once you've completed
-        every task
-      </p>
+      </div>
+      <div>
+        <ul>
+          {todoList.map((todo) => {
+            return (
+              <li
+                complete={todo.complete}
+                id={todo.id}
+                onClick={() => handleComplete(todo.id)}
+                style={{
+                  listStyle: "none",
+                  textDecoration: todo.complete && "line-through",
+                }}
+              >
+                {todo.task}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <button onClick={handleClear}>Clear</button>
     </div>
   );
 }
