@@ -6,9 +6,11 @@ function App() {
   const [input, setInput] = useState("");
   const [todoList, setTodoList] = useState([]);
   const [completeTaskCount, setCompleteTaskCount] = useState(0);
+  
   const handleClear = ()=>{
     setTodoList([])
     setCompleteTaskCount(0)
+    setInput("")
   }
   const handleComplete = (id) => {
     let list = todoList.map((task) => {
