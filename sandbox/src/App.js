@@ -1,88 +1,116 @@
-// import logo from './logo.svg';
-// import './App.css';
-import { React, useState } from "react";
+import { useEffect, useState } from "react";
 
-function App() {
-  const [input, setInput] = useState("");
-  const [todoList, setTodoList] = useState([]);
-  const [completeTaskCount, setCompleteTaskCount] = useState(0);
+export default function App() {
+  const [todos, setTodos] = useState(() => {
+    const savedTodos = localStorage.getItem("todos");
+    if (savedTodos) {
+      return JSON.parse(savedTodos);
+    } else {
+      return [];
+    }
+  });
+  const [todo, setTodo] = useState("");
   
-  const handleClear = ()=>{
-    setTodoList([])
-    setCompleteTaskCount(0)
-    setInput("")
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTodo, setCurrentTodo] = useState({});
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  function handleInputChange(e) {
+    setTodo(e.target.value);
   }
-  const handleComplete = (id) => {
-    let list = todoList.map((task) => {
-      let item = {};
-      if (task.id === id) {
-        if (!task.complete) {
-          setCompleteTaskCount(completeTaskCount + 1);
-        } else {setCompleteTaskCount(completeTaskCount -1 )}
-        item = { ...task, complete: !task.complete };
-      } else item = { ...task };
-      return item;
+
+  function handleEditInputChange(e) {
+    setCurrentTodo({ ...currentTodo, text: e.target.value });
+    console.log(currentTodo);
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+
+    if (todo !== "") {
+      setTodos([
+        ...todos,
+        {
+          id: todos.length + 1,
+          text: todo.trim()
+        }
+      ]);
+    }
+
+    setTodo("");
+  }
+
+  function handleEditFormSubmit(e) {
+    e.preventDefault();
+
+    handleUpdateTodo(currentTodo.id, currentTodo);
+  }
+
+  function handleDeleteClick(id) {
+    const removeItem = todos.filter((todo) => {
+      return todo.id !== id;
     });
-    setTodoList(list);
-  };
-  const handleClick = () => {
-    const id = todoList.length + 1;
-    setTodoList((prev) => [
-      ...prev,
-      {
-        id: id,
-        task: input,
-        complete: false,
-      },
-    ]);
-    setInput("");
-  };
+    setTodos(removeItem);
+  }
+
+  
+  function handleUpdateTodo(id, updatedTodo) {
+   
+    const updatedItem = todos.map((todo) => {
+      return todo.id === id ? updatedTodo : todo;
+    });
+    setIsEditing(false);
+    setTodos(updatedItem);
+  }
+
+  function handleEditClick(todo) {
+    setIsEditing(true);
+    setCurrentTodo({ ...todo });
+  }
+
   return (
-    <div>
-      <h2>Todo list</h2>
-      <input
-        value={input}
-        onInput={(e) => {
-          setInput(e.target.value);
-        }}
-      ></input>
-      <button
-        onClick={() => {
-          handleClick();
-        }}
-      >
-        Add
-      </button>
-      <div>
-      <b>Pending Tasks: </b> {todoList.length - completeTaskCount}
+    <div className="App">
+      {isEditing ? (
+        <form onSubmit={handleEditFormSubmit}>
+          <h2>Edit Todo</h2>
+          <label htmlFor="editTodo">Edit todo: </label>
+          <input
+            name="editTodo"
+            type="text"
+            placeholder="Edit todo"
+            value={currentTodo.text}
+            onChange={handleEditInputChange}
+          />
+          <button type="submit">Update</button>
+          <button onClick={() => setIsEditing(false)}>Cancel</button>
+        </form>
+      ) : (
+        <form onSubmit={handleFormSubmit}>
+          <h2>Add Todo</h2>
+          <label htmlFor="todo">Add todo: </label>
+          <input
+            name="todo"
+            type="text"
+            placeholder="Create a new todo"
+            value={todo}
+            onChange={handleInputChange}
+          />
+          <button type="submit">Add</button>
+        </form>
+      )}
 
-      </div>
-      <div>
-      <b>Completed Tasks: </b>{completeTaskCount}
-
-      </div>
-      <div>
-        <ul>
-          {todoList.map((todo) => {
-            return (
-              <li
-                complete={todo.complete}
-                id={todo.id}
-                onClick={() => handleComplete(todo.id)}
-                style={{
-                  listStyle: "none",
-                  textDecoration: todo.complete && "line-through",
-                }}
-              >
-                {todo.task}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <button onClick={handleClear}>Clear</button>
+      <ul className="todo-list">
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.text}
+            <button onClick={() => handleEditClick(todo)}>Edit</button>
+            <button onClick={() => handleDeleteClick(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
-
-export default App;
